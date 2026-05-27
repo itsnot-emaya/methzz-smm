@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — BoostHive</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body class="auth-page">
+<div class="auth-box">
+  <a href="/" class="logo">Boost<span>Hive</span></a>
+  <h2>Create your account</h2>
+  <p class="auth-sub">Start growing your social media today</p>
+
+  <div id="alert-box"></div>
+
+  <div class="form-group">
+    <label>Full Name</label>
+    <input type="text" id="name" placeholder="John Doe">
+  </div>
+  <div class="form-group">
+    <label>Email Address</label>
+    <input type="email" id="email" placeholder="you@example.com">
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Min. 6 characters">
+  </div>
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <input type="password" id="confirm" placeholder="Repeat password">
+  </div>
+
+  <button class="btn-primary btn-full" onclick="doRegister()">Create Account</button>
+
+  <div class="auth-switch">
+    Already have an account? <a href="login.html">Sign in</a>
+  </div>
+</div>
+
+<script>
+function doRegister() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const pw = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm').value;
+  const box = document.getElementById('alert-box');
+
+  if (!name || !email || !pw || !confirm) {
+    box.innerHTML = '<div class="alert alert-danger">Please fill in all fields.</div>'; return;
+  }
+  if (pw.length < 6) {
+    box.innerHTML = '<div class="alert alert-danger">Password must be at least 6 characters.</div>'; return;
+  }
+  if (pw !== confirm) {
+    box.innerHTML = '<div class="alert alert-danger">Passwords do not match.</div>'; return;
+  }
+
+  const users = JSON.parse(localStorage.getItem('bh_users') || '[]');
+  if (users.find(u => u.email === email)) {
+    box.innerHTML = '<div class="alert alert-danger">Email already registered.</div>'; return;
+  }
+
+  const user = {
+    id: Date.now(),
+    name, email, password: pw,
+    role: 'user',
+    balance: 0,
+    joined: new Date().toISOString(),
+    totalOrders: 0,
+    totalSpent: 0
+  };
+  users.push(user);
+  localStorage.setItem('bh_users', JSON.stringify(users));
+  localStorage.setItem('bh_user', JSON.stringify(user));
+  window.location.href = 'dashboard.html';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Order — BoostHive</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="logo">Boost<span>Hive</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+      <a href="new-order.html" class="nav-item active"><span class="icon">➕</span> New Order</a>
+      <a href="orders.html" class="nav-item"><span class="icon">📋</span> My Orders</a>
+      <div class="nav-section">Account</div>
+      <a href="funds.html" class="nav-item"><span class="icon">💳</span> Add Funds</a>
+      <a href="transactions.html" class="nav-item"><span class="icon">📜</span> Transactions</a>
+      <a href="profile.html" class="nav-item"><span class="icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar" id="sb-avatar">?</div>
+        <div><div class="user-name" id="sb-name">...</div><div class="user-bal" id="sb-bal">$0.00</div></div>
+      </div>
+      <a href="login.html" class="nav-item" onclick="logout()"><span class="icon">🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <h1>New Order</h1>
+      <div class="topbar-right">
+        <span class="bal-badge" id="top-bal">$0.00</span>
+        <button class="add-funds-btn" onclick="location.href='funds.html'">+ Add Funds</button>
+      </div>
+    </div>
+    <div class="page">
+      <div class="order-form-wrap">
+        <div class="order-form">
+          <h3 style="margin-bottom:20px">Place a New Order</h3>
+
+          <!-- Platform tabs -->
+          <div class="form-group">
+            <label>Platform</label>
+            <div class="category-tabs" id="platform-tabs">
+              <button class="cat-tab active" data-platform="Instagram" onclick="selectPlatform(this)">Instagram</button>
+              <button class="cat-tab" data-platform="YouTube" onclick="selectPlatform(this)">YouTube</button>
+              <button class="cat-tab" data-platform="TikTok" onclick="selectPlatform(this)">TikTok</button>
+              <button class="cat-tab" data-platform="Twitter" onclick="selectPlatform(this)">Twitter/X</button>
+              <button class="cat-tab" data-platform="Facebook" onclick="selectPlatform(this)">Facebook</button>
+              <button class="cat-tab" data-platform="Telegram" onclick="selectPlatform(this)">Telegram</button>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label>Category</label>
+            <div class="category-tabs" id="category-tabs"></div>
+          </div>
+
+          <!-- Service search -->
+          <div class="form-group service-search">
+            <label>Search & Select Service</label>
+            <input type="text" id="service-search" placeholder="Search services..." oninput="filterServices()">
+          </div>
+          <div id="service-list" style="margin-bottom:20px;max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm)"></div>
+
+          <!-- Service details -->
+          <div id="service-desc" class="alert alert-info" style="display:none"></div>
+
+          <div class="form-group">
+            <label>Link / URL</label>
+            <input type="text" id="order-link" placeholder="https://www.instagram.com/username" oninput="validateLink()">
+            <div id="link-hint" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="form-group">
+              <label>Quantity</label>
+              <input type="number" id="order-qty" placeholder="1000" min="10" oninput="calcCost()">
+              <div id="qty-hint" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+            </div>
+            <div class="form-group">
+              <label>Estimated Cost</label>
+              <input type="text" id="order-cost" value="$0.00" readonly style="background:var(--bg);cursor:default">
+            </div>
+          </div>
+
+          <div id="order-alert"></div>
+          <button class="btn-primary btn-full" onclick="placeOrder()">Place Order</button>
+        </div>
+
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          <div class="summary-row"><span class="label">Platform</span><span id="sum-platform">—</span></div>
+          <div class="summary-row"><span class="label">Service</span><span id="sum-service" style="text-align:right;max-width:180px;font-size:12.5px">—</span></div>
+          <div class="summary-row"><span class="label">Rate</span><span id="sum-rate">—</span></div>
+          <div class="summary-row"><span class="label">Quantity</span><span id="sum-qty">—</span></div>
+          <div class="summary-row"><span class="label">Min / Max</span><span id="sum-minmax">—</span></div>
+          <div class="summary-total">
+            <span class="label">Total</span>
+            <span class="val" id="sum-total">$0.00</span>
+          </div>
+          <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px">
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">
+              ✅ Instant start on most services<br>
+              🔄 30-day refill guarantee<br>
+              📞 24/7 support available<br>
+              💰 Charged from your balance
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+const user = requireAuth();
+renderSidebar(user);
+
+let selectedPlatform = 'Instagram';
+let selectedCategory = '';
+let selectedService = null;
+
+const LINK_HINTS = {
+  Instagram: 'e.g. https://instagram.com/username or post URL',
+  YouTube: 'e.g. https://youtube.com/watch?v=... or channel URL',
+  TikTok: 'e.g. https://tiktok.com/@username or video URL',
+  Twitter: 'e.g. https://twitter.com/username or tweet URL',
+  Facebook: 'e.g. https://facebook.com/pagename or post URL',
+  Telegram: 'e.g. https://t.me/channelname or post link',
+};
+
+function selectPlatform(btn) {
+  document.querySelectorAll('#platform-tabs .cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPlatform = btn.dataset.platform;
+  selectedCategory = '';
+  selectedService = null;
+  renderCategories();
+  renderServiceList();
+  updateSummary();
+  document.getElementById('link-hint').textContent = LINK_HINTS[selectedPlatform] || '';
+}
+
+function renderCategories() {
+  const svcs = getServices().filter(s => s.platform === selectedPlatform && s.active);
+  const cats = [...new Set(svcs.map(s => s.category))];
+  const container = document.getElementById('category-tabs');
+  container.innerHTML = '<button class="cat-tab active" data-cat="" onclick="selectCat(this)">All</button>' +
+    cats.map(c => `<button class="cat-tab" data-cat="${c}" onclick="selectCat(this)">${c}</button>`).join('');
+}
+
+function selectCat(btn) {
+  document.querySelectorAll('#category-tabs .cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedCategory = btn.dataset.cat;
+  renderServiceList();
+}
+
+function filterServices() { renderServiceList(); }
+
+function renderServiceList() {
+  const q = document.getElementById('service-search').value.toLowerCase();
+  let svcs = getServices().filter(s => s.platform === selectedPlatform && s.active);
+  if (selectedCategory) svcs = svcs.filter(s => s.category === selectedCategory);
+  if (q) svcs = svcs.filter(s => s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q));
+  const container = document.getElementById('service-list');
+  if (!svcs.length) {
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No services found</div>';
+    return;
+  }
+  container.innerHTML = svcs.map(s => `
+    <div class="svc-row ${selectedService && selectedService.id === s.id ? 'svc-selected' : ''}"
+         onclick="selectService(${s.id})"
+         style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s">
+      <div>
+        <div style="font-size:13.5px;font-weight:600">${s.name}</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${s.category} • Min: ${s.min} / Max: ${s.max.toLocaleString()}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:12px">
+        <div style="font-size:13px;font-weight:700;color:var(--accent2)">$${s.rate}/1K</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectService(id) {
+  selectedService = getServices().find(s => s.id === id);
+  renderServiceList();
+  document.getElementById('order-qty').min = selectedService.min;
+  document.getElementById('order-qty').placeholder = selectedService.min;
+  document.getElementById('qty-hint').textContent = `Min: ${selectedService.min} — Max: ${selectedService.max.toLocaleString()}`;
+  const desc = document.getElementById('service-desc');
+  desc.style.display = 'block';
+  desc.textContent = `ℹ️ ${selectedService.description || ''}`;
+  updateSummary();
+  calcCost();
+}
+
+function calcCost() {
+  const qty = parseInt(document.getElementById('order-qty').value) || 0;
+  if (!selectedService || !qty) return;
+  const cost = selectedService.rate * qty / 1000;
+  document.getElementById('order-cost').value = '$' + cost.toFixed(4);
+  document.getElementById('sum-total').textContent = '$' + cost.toFixed(4);
+  document.getElementById('sum-qty').textContent = qty.toLocaleString();
+}
+
+function updateSummary() {
+  document.getElementById('sum-platform').textContent = selectedPlatform || '—';
+  document.getElementById('sum-service').textContent = selectedService ? selectedService.name : '—';
+  document.getElementById('sum-rate').textContent = selectedService ? `$${selectedService.rate}/1000` : '—';
+  document.getElementById('sum-minmax').textContent = selectedService ? `${selectedService.min} / ${selectedService.max.toLocaleString()}` : '—';
+}
+
+function validateLink() {
+  const val = document.getElementById('order-link').value.trim();
+  const hint = document.getElementById('link-hint');
+  if (!val) { hint.textContent = LINK_HINTS[selectedPlatform] || ''; return; }
+  try { new URL(val); hint.textContent = '✅ Valid URL'; hint.style.color = 'var(--success)'; }
+  catch { hint.textContent = '⚠️ Enter a valid URL'; hint.style.color = 'var(--warning)'; }
+}
+
+function placeOrder() {
+  const link = document.getElementById('order-link').value.trim();
+  const qty = parseInt(document.getElementById('order-qty').value);
+  const alertEl = document.getElementById('order-alert');
+
+  if (!selectedService) { alertEl.innerHTML = '<div class="alert alert-danger">Please select a service.</div>'; return; }
+  if (!link) { alertEl.innerHTML = '<div class="alert alert-danger">Enter the target link/URL.</div>'; return; }
+  if (!qty || qty < selectedService.min || qty > selectedService.max) {
+    alertEl.innerHTML = `<div class="alert alert-danger">Quantity must be between ${selectedService.min} and ${selectedService.max.toLocaleString()}.</div>`; return;
+  }
+
+  const charge = parseFloat((selectedService.rate * qty / 1000).toFixed(6));
+  const currentUser = getUser();
+  if (currentUser.balance < charge) {
+    alertEl.innerHTML = `<div class="alert alert-danger">Insufficient balance ($${currentUser.balance.toFixed(2)}). Need $${charge.toFixed(4)}. <a href="funds.html" style="color:var(--accent2)">Add funds →</a></div>`; return;
+  }
+
+  const order = {
+    id: Date.now(), userId: currentUser.id,
+    platform: selectedPlatform, serviceId: selectedService.id, serviceName: selectedService.name,
+    link, quantity: qty, charge, status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  saveOrder(order);
+  updateUserBalance(currentUser.id, -charge);
+  addTransaction({ userId: currentUser.id, type: 'order', amount: -charge, description: `Order #${order.id} — ${selectedService.name}` });
+
+  alertEl.innerHTML = `<div class="alert alert-success">✅ Order #${order.id} placed for $${charge.toFixed(4)}! Processing shortly.</div>`;
+  renderSidebar(getUser());
+  document.getElementById('top-bal').textContent = '$' + getUser().balance.toFixed(2);
+}
+
+// Init
+renderCategories();
+renderServiceList();
+document.getElementById('link-hint').textContent = LINK_HINTS['Instagram'];
+</script>
+<style>
+.svc-row:hover { background: rgba(255,255,255,.03); }
+.svc-row.svc-selected { background: rgba(124,92,252,.1); }
+</style>
+</body>
+</html>

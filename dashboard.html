@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — BoostHive</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="dash-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">Boost<span>Hive</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <a href="dashboard.html" class="nav-item active"><span class="icon">📊</span> Dashboard</a>
+      <a href="new-order.html" class="nav-item"><span class="icon">➕</span> New Order</a>
+      <a href="orders.html" class="nav-item"><span class="icon">📋</span> My Orders</a>
+      <div class="nav-section">Account</div>
+      <a href="funds.html" class="nav-item"><span class="icon">💳</span> Add Funds</a>
+      <a href="transactions.html" class="nav-item"><span class="icon">📜</span> Transactions</a>
+      <a href="profile.html" class="nav-item"><span class="icon">👤</span> Profile</a>
+      <div class="nav-section">Help</div>
+      <a href="support.html" class="nav-item"><span class="icon">💬</span> Support</a>
+      <a href="faq.html" class="nav-item"><span class="icon">❓</span> FAQ</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar" id="sb-avatar">?</div>
+        <div>
+          <div class="user-name" id="sb-name">Loading...</div>
+          <div class="user-bal" id="sb-bal">$0.00</div>
+        </div>
+      </div>
+      <a href="login.html" class="nav-item" onclick="logout()" style="margin-top:4px"><span class="icon">🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+      <div class="topbar-right">
+        <span class="bal-badge" id="top-bal">$0.00</span>
+        <button class="add-funds-btn" onclick="location.href='funds.html'">+ Add Funds</button>
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="alert alert-info" id="welcome-msg"></div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="sc-label">Balance</div>
+          <div class="sc-value" id="stat-bal">$0.00</div>
+          <div class="sc-change up">Available funds</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Total Orders</div>
+          <div class="sc-value" id="stat-orders">0</div>
+          <div class="sc-change">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Total Spent</div>
+          <div class="sc-value" id="stat-spent">$0.00</div>
+          <div class="sc-change">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Pending</div>
+          <div class="sc-value" id="stat-pending">0</div>
+          <div class="sc-change up">Active orders</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Recent Orders</h3>
+            <a href="orders.html" style="font-size:13px;color:var(--accent2)">View all →</a>
+          </div>
+          <table>
+            <thead><tr><th>#ID</th><th>Service</th><th>Qty</th><th>Status</th></tr></thead>
+            <tbody id="recent-orders-body">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">No orders yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="order-summary" style="position:static">
+          <h3 style="margin-bottom:16px">Quick Order</h3>
+          <div class="form-group">
+            <label>Platform</label>
+            <select id="quick-platform" onchange="loadQuickServices()">
+              <option value="">-- Select Platform --</option>
+              <option value="Instagram">Instagram</option>
+              <option value="YouTube">YouTube</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Twitter">Twitter / X</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Telegram">Telegram</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Service</label>
+            <select id="quick-service">
+              <option value="">-- Select Service --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Link / URL</label>
+            <input type="text" id="quick-link" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="quick-qty" placeholder="100" min="10">
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px">
+            Estimated cost: <strong style="color:var(--accent2)" id="quick-cost">$0.00</strong>
+          </div>
+          <button class="btn-primary btn-full" onclick="placeQuickOrder()">Place Order</button>
+          <div id="quick-msg" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+const user = requireAuth();
+renderSidebar(user);
+document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name}! 👋 You have $${user.balance.toFixed(2)} in your account.`;
+document.getElementById('stat-bal').textContent = '$' + user.balance.toFixed(2);
+
+// Count orders
+const allOrders = getOrders().filter(o => o.userId === user.id);
+const pending = allOrders.filter(o => ['pending','processing'].includes(o.status)).length;
+const spent = allOrders.reduce((s, o) => s + (o.charge || 0), 0);
+document.getElementById('stat-orders').textContent = allOrders.length;
+document.getElementById('stat-spent').textContent = '$' + spent.toFixed(2);
+document.getElementById('stat-pending').textContent = pending;
+
+// Recent orders table
+const tbody = document.getElementById('recent-orders-body');
+const recent = allOrders.slice(-5).reverse();
+if (recent.length) {
+  tbody.innerHTML = recent.map(o => `
+    <tr>
+      <td>#${o.id}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.serviceName}</td>
+      <td>${o.quantity.toLocaleString()}</td>
+      <td><span class="badge-status badge-${o.status}">${o.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Quick order
+function loadQuickServices() {
+  const platform = document.getElementById('quick-platform').value;
+  const sel = document.getElementById('quick-service');
+  const services = getServices().filter(s => s.platform === platform && s.active);
+  sel.innerHTML = '<option value="">-- Select Service --</option>' +
+    services.map(s => `<option value="${s.id}" data-rate="${s.rate}">${s.name} ($${s.rate}/1000)</option>`).join('');
+  sel.onchange = updateCost;
+  document.getElementById('quick-qty').oninput = updateCost;
+}
+
+function updateCost() {
+  const sel = document.getElementById('quick-service');
+  const opt = sel.options[sel.selectedIndex];
+  const rate = opt ? parseFloat(opt.dataset.rate || 0) : 0;
+  const qty = parseInt(document.getElementById('quick-qty').value) || 0;
+  document.getElementById('quick-cost').textContent = '$' + ((rate * qty / 1000)).toFixed(4);
+}
+
+function placeQuickOrder() {
+  const platform = document.getElementById('quick-platform').value;
+  const serviceId = document.getElementById('quick-service').value;
+  const link = document.getElementById('quick-link').value.trim();
+  const qty = parseInt(document.getElementById('quick-qty').value);
+  const msg = document.getElementById('quick-msg');
+
+  if (!platform || !serviceId || !link || !qty) {
+    msg.innerHTML = '<div class="alert alert-danger">Fill all fields.</div>'; return;
+  }
+
+  const service = getServices().find(s => s.id == serviceId);
+  const charge = parseFloat((service.rate * qty / 1000).toFixed(4));
+  const currentUser = getUser();
+
+  if (currentUser.balance < charge) {
+    msg.innerHTML = '<div class="alert alert-danger">Insufficient balance. <a href="funds.html" style="color:var(--accent2)">Add funds →</a></div>'; return;
+  }
+
+  const order = {
+    id: Date.now(),
+    userId: currentUser.id,
+    platform, serviceId: service.id, serviceName: service.name,
+    link, quantity: qty, charge,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  saveOrder(order);
+  updateUserBalance(currentUser.id, -charge);
+  msg.innerHTML = `<div class="alert alert-success">Order #${order.id} placed! ✅</div>`;
+  setTimeout(() => location.reload(), 1500);
+}
+</script>
+</body>
+</html>

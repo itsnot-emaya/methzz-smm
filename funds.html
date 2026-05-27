@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Funds — BoostHive</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="logo">Boost<span>Hive</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+      <a href="new-order.html" class="nav-item"><span class="icon">➕</span> New Order</a>
+      <a href="orders.html" class="nav-item"><span class="icon">📋</span> My Orders</a>
+      <div class="nav-section">Account</div>
+      <a href="funds.html" class="nav-item active"><span class="icon">💳</span> Add Funds</a>
+      <a href="transactions.html" class="nav-item"><span class="icon">📜</span> Transactions</a>
+      <a href="profile.html" class="nav-item"><span class="icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar" id="sb-avatar">?</div>
+        <div><div class="user-name" id="sb-name">...</div><div class="user-bal" id="sb-bal">$0.00</div></div>
+      </div>
+      <a href="login.html" class="nav-item" onclick="logout()"><span class="icon">🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <h1>Add Funds</h1>
+      <div class="topbar-right">
+        <span class="bal-badge" id="top-bal">$0.00</span>
+      </div>
+    </div>
+    <div class="page">
+      <div style="max-width:680px">
+
+        <div class="alert alert-info" style="margin-bottom:24px">
+          💡 Minimum deposit is <strong>$1.00</strong>. Funds are added instantly after payment confirmation.
+        </div>
+
+        <!-- Step 1: Amount -->
+        <div class="order-form" style="margin-bottom:20px">
+          <h3 style="margin-bottom:18px">1. Choose Amount</h3>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+            <button class="amount-btn" onclick="setAmount(5)">$5</button>
+            <button class="amount-btn" onclick="setAmount(10)">$10</button>
+            <button class="amount-btn" onclick="setAmount(25)">$25</button>
+            <button class="amount-btn" onclick="setAmount(50)">$50</button>
+            <button class="amount-btn" onclick="setAmount(100)">$100</button>
+            <button class="amount-btn" onclick="setAmount(250)">$250</button>
+            <button class="amount-btn" onclick="setAmount(500)">$500</button>
+            <button class="amount-btn" onclick="setAmount(1000)">$1000</button>
+          </div>
+          <div class="form-group">
+            <label>Or enter custom amount (USD)</label>
+            <input type="number" id="custom-amount" placeholder="Enter amount..." min="1" step="0.01" oninput="updateAmount()" style="font-size:1.2rem;padding:14px">
+          </div>
+        </div>
+
+        <!-- Step 2: Payment Method -->
+        <div class="order-form" style="margin-bottom:20px">
+          <h3 style="margin-bottom:18px">2. Select Payment Method</h3>
+          <div class="payment-methods">
+            <div class="pm-card selected" data-method="crypto" onclick="selectMethod(this)">
+              <div class="pm-icon">₿</div>
+              <div class="pm-name">Crypto</div>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px">BTC, ETH, USDT</div>
+            </div>
+            <div class="pm-card" data-method="paypal" onclick="selectMethod(this)">
+              <div class="pm-icon">🅿️</div>
+              <div class="pm-name">PayPal</div>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Friends & Family</div>
+            </div>
+            <div class="pm-card" data-method="card" onclick="selectMethod(this)">
+              <div class="pm-icon">💳</div>
+              <div class="pm-name">Card</div>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Visa / Mastercard</div>
+            </div>
+            <div class="pm-card" data-method="perfect" onclick="selectMethod(this)">
+              <div class="pm-icon">💵</div>
+              <div class="pm-name">Perfect Money</div>
+              <div style="font-size:10.5px;color:var(--muted);margin-top:4px">USD / EUR</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Confirm -->
+        <div class="order-form" id="confirm-section">
+          <h3 style="margin-bottom:18px">3. Confirm Payment</h3>
+
+          <!-- Crypto instructions -->
+          <div id="pm-crypto">
+            <div class="alert alert-warning">Send the exact amount to the address below. Funds are added after 1 network confirmation.</div>
+            <div class="form-group">
+              <label>Select Coin</label>
+              <select id="coin-select" style="margin-bottom:12px">
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="USDT">USDT (TRC20)</option>
+                <option value="LTC">Litecoin (LTC)</option>
+              </select>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Send to address:</div>
+              <div id="crypto-address" style="font-family:monospace;font-size:13px;word-break:break-all;color:var(--accent2)">1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf</div>
+              <button onclick="copyAddress()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:6px">📋 Copy Address</button>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px">
+              Amount to send: <strong style="color:var(--text)" id="crypto-usd">$0.00 USD equivalent</strong>
+            </div>
+            <button class="btn-primary btn-full" onclick="submitManualPayment('crypto')">I Have Sent Payment — Notify Admin</button>
+          </div>
+
+          <!-- PayPal instructions -->
+          <div id="pm-paypal" style="display:none">
+            <div class="alert alert-warning">Send as <strong>Friends & Family</strong> only. Do NOT add notes. Use the button below.</div>
+            <div style="background:var(--bg3);padding:16px;border-radius:var(--radius-sm);margin-bottom:16px;text-align:center">
+              <div style="font-size:14px;color:var(--muted);margin-bottom:4px">PayPal email:</div>
+              <div style="font-size:1.1rem;font-weight:700">payments@boosthive.com</div>
+            </div>
+            <a id="paypal-link" href="#" target="_blank" class="btn-primary btn-full" style="display:block;text-align:center;margin-bottom:12px">Open PayPal →</a>
+            <button class="btn-outline btn-full" onclick="submitManualPayment('paypal')">I Have Sent Payment — Notify Admin</button>
+          </div>
+
+          <!-- Card (Stripe placeholder) -->
+          <div id="pm-card" style="display:none">
+            <div class="alert alert-info">Card payments via Stripe. Enter your card details below.</div>
+            <div class="form-group"><label>Card Number</label><input type="text" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="form-group"><label>Expiry</label><input type="text" placeholder="MM/YY"></div>
+              <div class="form-group"><label>CVC</label><input type="text" placeholder="123" maxlength="4"></div>
+            </div>
+            <div id="stripe-msg" class="alert alert-warning">⚠️ Connect your Stripe account in admin settings to enable card payments.</div>
+            <button class="btn-primary btn-full" disabled>Pay Now (Stripe not configured)</button>
+          </div>
+
+          <!-- Perfect Money -->
+          <div id="pm-perfect" style="display:none">
+            <div class="alert alert-warning">Send to the Perfect Money account below as <strong>Payment</strong>.</div>
+            <div style="background:var(--bg3);padding:16px;border-radius:var(--radius-sm);margin-bottom:16px;text-align:center">
+              <div style="font-size:14px;color:var(--muted);margin-bottom:4px">Account Number:</div>
+              <div style="font-size:1.1rem;font-weight:700">U12345678</div>
+            </div>
+            <button class="btn-primary btn-full" onclick="submitManualPayment('perfectmoney')">I Have Sent Payment — Notify Admin</button>
+          </div>
+        </div>
+
+        <div id="payment-sent-msg" style="display:none" class="alert alert-success" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+const user = requireAuth();
+renderSidebar(user);
+
+let selectedMethod = 'crypto';
+let currentAmount = 0;
+
+const CRYPTO_ADDRESSES = {
+  BTC: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+  ETH: '0x742d35Cc6634C0532925a3b844Bc9e7595ed5b7',
+  USDT: 'TN3W4H6rK2ce4vX9YnFQHwKx8Vqs2mhNNE',
+  LTC: 'LQ3JqCohgLQ3x1CafHbAqHQqpQdkC1YXYZ',
+};
+
+document.getElementById('coin-select').addEventListener('change', function() {
+  document.getElementById('crypto-address').textContent = CRYPTO_ADDRESSES[this.value];
+});
+
+function setAmount(val) {
+  currentAmount = val;
+  document.getElementById('custom-amount').value = val;
+  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+  event.target.classList.add('selected');
+  updateCryptoDisplay();
+}
+
+function updateAmount() {
+  currentAmount = parseFloat(document.getElementById('custom-amount').value) || 0;
+  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+  updateCryptoDisplay();
+}
+
+function updateCryptoDisplay() {
+  document.getElementById('crypto-usd').textContent = `$${currentAmount.toFixed(2)} USD equivalent`;
+  document.getElementById('paypal-link').href = `https://paypal.me/boosthive/${currentAmount}`;
+}
+
+function selectMethod(el) {
+  document.querySelectorAll('.pm-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMethod = el.dataset.method;
+  ['pm-crypto','pm-paypal','pm-card','pm-perfect'].forEach(id => document.getElementById(id).style.display = 'none');
+  const map = { crypto: 'pm-crypto', paypal: 'pm-paypal', card: 'pm-card', perfect: 'pm-perfect' };
+  document.getElementById(map[selectedMethod]).style.display = 'block';
+}
+
+function copyAddress() {
+  navigator.clipboard.writeText(document.getElementById('crypto-address').textContent);
+  alert('Address copied!');
+}
+
+function submitManualPayment(method) {
+  if (!currentAmount || currentAmount < 1) {
+    alert('Please enter a valid amount (minimum $1)'); return;
+  }
+  // Save payment request for admin review
+  const requests = JSON.parse(localStorage.getItem('bh_fund_requests') || '[]');
+  const req = {
+    id: Date.now(), userId: user.id, userName: user.name, userEmail: user.email,
+    amount: currentAmount, method, status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  requests.push(req);
+  localStorage.setItem('bh_fund_requests', JSON.stringify(requests));
+
+  document.getElementById('payment-sent-msg').style.display = 'block';
+  document.getElementById('payment-sent-msg').textContent =
+    `✅ Payment notification sent! Your request for $${currentAmount.toFixed(2)} via ${method} has been submitted. Admin will verify and add funds within 1-24 hours.`;
+}
+</script>
+<style>
+.amount-btn {
+  background: var(--card); border: 1px solid var(--border2); color: var(--text);
+  border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-head);
+  font-size: 1rem; font-weight: 700; cursor: pointer; transition: all .15s;
+}
+.amount-btn:hover, .amount-btn.selected { background: rgba(124,92,252,.15); border-color: var(--accent); color: var(--accent2); }
+</style>
+</body>
+</html>
